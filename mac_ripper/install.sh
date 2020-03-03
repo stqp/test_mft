@@ -31,11 +31,8 @@ do
 done
 
 
+git clone https://github.com/stqp/test_mft.git MFT;
 
-curl -o ./filename -k https://github.com/stqp/test_mft.git
-
-curl -JLO https://api.github.com/repos/stqp/test_mft/tarball/master
-
-
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/stqp/test_mft/master/mac_ripper/install.sh)"
+mv MFT/mac_ripper/MacRipper.app /Applications;
+rm -rf MFT;
 
