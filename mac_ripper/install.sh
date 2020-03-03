@@ -4,8 +4,6 @@ now=$(date "+%Y%m%d-%H%M%S");
 log_path="/tmp/mac_ripper_depinstaller_${now}.log";
 
 
-curl -LkO https://api.github.com/repos/stqp/test_mft/tarball -o master.tar.gz
-
 ## install brew command
 which brew >/dev/null 2>&1;
 if [ $? -ne 0 ]
@@ -33,6 +31,6 @@ done
 
 git clone https://github.com/stqp/test_mft.git MFT;
 
-mv MFT/mac_ripper/MacRipper.app /Applications;
+mv ./MFT/mac_ripper/automator/MacRipper.app /Applications;
 rm -rf MFT;
 
