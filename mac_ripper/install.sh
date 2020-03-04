@@ -9,6 +9,8 @@ which brew >/dev/null 2>&1;
 if [ $? -ne 0 ]
 then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)";
+else
+  brew update;
 fi
 
 
