@@ -35,8 +35,35 @@ do
 done
 
 
+pip_deps=(
+pytz
+lz4
+inquirer
+)
+for dep in ${pip_deps[@]}
+do 
+  python3 -c "import ${dep}" >/dev/null 2>&1;
+  if [ $? -ne 0 ]
+  then
+    echo "Installing pip3 module : ${dep} ";    
+    pip3 install --user ${dep};
+    echo "${dep} is installed.";
+  else
+    echo "Upgrading pip3 module : ${dep}";
+    pip3 install -U ${dep};
+    echo "${dep} is upgraded.";
+  fi 
+done
+
+
+## install MacRipper.app
 git clone https://github.com/stqp/test_mft.git MFT;
 
-mv ./MFT/mac_ripper/automator/MacRipper.app /Applications;
+if [ -e /Applications/MacRipper.app ]
+then 
+  rm -r /Applications/MacRipper.app
+fi
+
+mv ./MFT/mac_ripper/automator/MacRipper.app /Applications/MacRipper.app;
 rm -rf MFT;
 
