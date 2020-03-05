@@ -4,8 +4,6 @@ import os
 import json
 import csv
 import argparse
-import shlex
-import time
 
 
 class UnifiedLogs:
@@ -61,7 +59,7 @@ class UnifiedLogs:
         self.log.debug("[+] Start to copy Unified Logs")
 
         # uuidtextのパスの調査
-        uuidtext_path = os.path.join(self.evidence_root, "private/var/db/uuidtext")
+        uuidtext_path = os.path.join(self.evidence_root, "var/db/uuidtext")
         self.log.debug(f"[+] Now copying Unified Logs from {uuidtext_path}")
         if not os.path.exists(uuidtext_path):
             self.log.warning(f"[-] Error: Directory {uuidtext_path} is not exists.")
@@ -69,7 +67,7 @@ class UnifiedLogs:
 
         # uuidtext logをコピー
         try:
-            proc = subprocess.run(['cp', '-rp', uuidtext_path + "/", self.logarchive_path])
+            proc = subprocess.run(['cp', '-Rp', uuidtext_path + "/", self.logarchive_path])
         except subprocess.SubprocessError as err:
             self.log.warning(f"[-] Error: copy failed: Error: {err}")
 
@@ -77,7 +75,7 @@ class UnifiedLogs:
             self.log.warning(f"[-] Error: copy failed: Error: {proc}")
 
         # diagnosticsのパスの調査
-        diagnostics_path = os.path.join(self.evidence_root, "private/var/db/diagnostics")
+        diagnostics_path = os.path.join(self.evidence_root, "var/db/diagnostics")
         self.log.debug(f"[+] Now copying Unified Logs from {diagnostics_path}")
         if not os.path.exists(diagnostics_path):
             self.log.warning(f"[-] Error: Directory {diagnostics_path} is not exists.")
@@ -85,7 +83,7 @@ class UnifiedLogs:
 
         # diagnostics logをコピー
         try:
-            proc = subprocess.run(['cp', '-rp', diagnostics_path + "/", self.logarchive_path])
+            proc = subprocess.run(['cp', '-Rp', diagnostics_path + "/", self.logarchive_path])
         except subprocess.SubprocessError as err:
             self.log.warning(f"[-] Error: copy failed: Error: {err}")
 
@@ -93,6 +91,26 @@ class UnifiedLogs:
             self.log.warning(f"[-] Error: copy failed: Error: {proc}")
 
         self.log.debug(f"[+] Unified Logs copy is completed")
+
+        self.create_info_plist()
+
+    def create_info_plist(self):
+        if os.path.exists(os.path.join(self.logarchive_path, "Info.plist")):
+            return
+
+        xml = """
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>OSArchiveVersion</key>
+        <integer>4</integer>
+    </dict>
+</plist>
+        """
+
+        with open(os.path.join(self.logarchive_path, "Info.plist"), "w") as fplist:
+            fplist.write(xml)
 
     def output_unifiled_log(self, predicate="", start="", end="", tz="", output_format="csv", file_name_suffix=""):
         """Parse Unified Logs and output.
@@ -174,7 +192,7 @@ class UnifiedLogs:
             elif output_format == 'csv':
 
                 # fieldの定義
-                field_name = ["timestamp", "traceID", "eventMessage", "eventType", "source", "formatString", "activityIdentifier", "subsystem", "category", "threadID", "senderImageUUID", "backtrace", "processImagePath", "senderImagePath", "machTimestamp", "messageType", "processImageUUID", "processID", "senderProgramCounter", "parentActivityIdentifier", "timezoneName", "creatorActivityID"]
+                field_name = ["timestamp", "traceID", "eventMessage", "eventType", "source", "formatString", "activityIdentifier", "subsystem", "category", "threadID", "senderImageUUID", "backtrace", "processImagePath", "senderImagePath", "machTimestamp", "messageType", "processImageUUID", "processID", "senderProgramCounter", "parentActivityIdentifier", "timezoneName", "creatorActivityID", "bootUUID"]
 
                 # dialect(formatの指定方法)
                 csv.register_dialect('unified_dialect', doublequote=True, quoting=csv.QUOTE_ALL)
@@ -186,7 +204,7 @@ class UnifiedLogs:
                     try:
                         csv_writer.writerow(block)
                     except Exception as err:
-                        self.log.error(f"[-] Error: Filed to write csv file. Error: {err}")
+                        self.log.error(f"[-] Error: Failed to write csv file. Error: {err}")
 
         self.log.debug(f"[+] Output Unified Logs is completed.")
         self.log.debug(f"[+] Filename is '{file_name}'.")
@@ -249,7 +267,7 @@ if __name__ == '__main__':
                              default='')
     args_parser.add_argument('-p', '--predicate',
                              help="please input the flexible filter like \"eventMessage contains 'USBMSC'\". "
-                                  "Also you can use a preset using the keyword: 'usb', 'ns'(network share), 'volume', 'hfs', 'all",
+                                  "Also you can use a preset using the keyword: 'usb', 'ns'(network share), 'volume', 'hfs', 'all'",
                              type=str,
                              default='')
     args_parser.add_argument('-f', '--output_format',
@@ -270,8 +288,14 @@ if __name__ == '__main__':
                              default="")
     args = args_parser.parse_args()
 
+    from logging import basicConfig, getLogger, DEBUG
+    basicConfig(level=DEBUG)
+    logger = getLogger(__name__)
+    logger.debug('hello')
+
     # インスタンス作成
-    unified_logs = UnifiedLogs(args.root, args.output)
+    #print(args)
+    unified_logs = UnifiedLogs(args.root, args.output, logger)
     unified_logs.parse(args.start, args.end, args.predicate, args.output_format, args.timezone, args.name)
 
 
