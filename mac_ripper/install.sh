@@ -4,6 +4,13 @@ now=$(date "+%Y%m%d-%H%M%S");
 log_path="/tmp/mac_ripper_depinstaller_${now}.log";
 
 
+## clean up old .app
+if [ -e /Applications/MacRipper.app ]
+then 
+  sudo rm -rf /Applications/MacRipper.app
+fi
+
+
 ## install brew command
 which brew >/dev/null 2>&1;
 if [ $? -ne 0 ]
@@ -57,13 +64,7 @@ done
 
 
 ## install MacRipper.app
-git clone https://github.com/stqp/test_mft.git MFT;
-
-if [ -e /Applications/MacRipper.app ]
-then 
-  sudo rm -fr /Applications/MacRipper.app
-fi
-
-mv ./MFT/mac_ripper/automator/MacRipper.app /Applications/MacRipper.app;
-rm -rf MFT;
+git clone https://github.com/stqp/test_mft.git /tmp/MFT;
+mv /tmp/MFT/mac_ripper/automator/MacRipper.app /Applications/MacRipper.app;
+rm -rf /tmp/MFT;
 
