@@ -64,7 +64,8 @@ done
 
 
 ## install MacRipper.app
-git clone https://github.com/stqp/test_mft.git /tmp/MFT;
-mv /tmp/MFT/mac_ripper/automator/MacRipper.app /Applications/MacRipper.app;
-rm -rf /tmp/MFT;
+cd /tmp
+git clone https://github.com/stqp/test_mft.git MFT;
+mv MFT/mac_ripper/automator/MacRipper.app /Applications/MacRipper.app;
+rm -rf MFT;
 
