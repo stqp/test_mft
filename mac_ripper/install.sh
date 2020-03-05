@@ -25,8 +25,12 @@ do
   if [ $? -ne 0 ]
   then
     echo "Installing brew formula : ${dep} ";    
-    brew install ${dep} ;
-    echo "${dep} is installed." >> ${log_path} 2>&1;
+    brew install ${dep};
+    echo "${dep} is installed.";
+  else
+    echo "Upgrading brew formula : ${dep} ";
+    brew upgrade ${dep};
+    echo "${dep} is upgraded.";
   fi
 done
 
