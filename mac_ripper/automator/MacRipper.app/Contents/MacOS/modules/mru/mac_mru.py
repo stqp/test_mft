@@ -416,59 +416,45 @@ class Mru:
             targets.extend(glob.glob(gl))
         return targets
 
-
     def parse(self):
         self.log.debug("[+] Processing Mac MRU")
-        for root, dirs, filenames in os.walk(self.evidence_root):
-            for f in filenames:
-                mru_file = os.path.join(root, f)
+        for target_path in self.find_target_paths():
+            f = os.path.basename(target_path)
 
-                if not os.path.exists(mru_file):
-                    continue
+            fmts = []
+            if self.isMatch(f, ['*.sfl']) and not self.isMatch(f, ['*Favorite*.sfl', '*Project*.sfl',
+                                                                   '*iCloudItems*.sfl'], orMatch=True):
+                fmts = self.format_bookmarks(self.parseSFL(target_path))
+            elif self.isMatch(f, ['*.sfl2']) and not self.isMatch(f, ['*Favorite*.sfl2', '*Project*.sfl2',
+                                                                      '*iCloudItems*.sfl2'], orMatch=True):
+                fmts = self.format_bookmarks(self.parseSFL2(target_path))
+            elif self.isMatch(f, ['*FavoriteVolumes.sfl2']):
+                fmts = self.format_bookmarks(self.parseSFL2_FavoriteVolumes(target_path))
+            elif self.isMatch(f, ['*.LSSharedFileList.plist']):
+                fmts = self.format_bookmarks(self.parseLSSharedFileListPlist(target_path))
+            elif f == "com.apple.finder.plist":
+                bookmarks, aliases = self.parseFinderPlist(target_path)
+                fmts = self.format_bookmarks_alias(bookmarks, aliases)
+            elif f == "com.apple.sidebarlists.plist":
+                fmts = self.format_aliases(self.parseSidebarlistsPlist(target_path))
+            elif f == "com.apple.recentitems.plist":
+                bookmarks, aliases = self.parseRecentItemsPlist(target_path)
+                fmts = self.format_bookmarks_alias(bookmarks, aliases)
+            elif f.endswith(".securebookmarks.plist"):
+                fmts = self.format_bookmarks(self.parseMSOffice2016Plist(target_path))
+            elif f == "com.microsoft.office.plist":
+                fmts = self.format_aliases(self.parseMSOffice2011Plist(target_path))
+            elif f == "com.apple.spotlight.Shortcuts":
+                fmts = self.format_dict_data(self.spotlightShortcuts(target_path))
+            else:
+                continue
 
-                fmts = []
-                if self.isMatch(f, ['*.sfl']) and not self.isMatch(f, ['*Favorite*.sfl', '*Project*.sfl',
-                                                                       '*iCloudItems*.sfl'], orMatch=True):
-                    fmts = self.format_bookmarks(self.parseSFL(mru_file))
-
-                elif self.isMatch(f, ['*.sfl2']) and not self.isMatch(f, ['*Favorite*.sfl2', '*Project*.sfl2',
-                                                                          '*iCloudItems*.sfl2'], orMatch=True):
-                    fmts = self.format_bookmarks(self.parseSFL2(mru_file))
-
-                elif self.isMatch(f, ['*FavoriteVolumes.sfl2']):
-                    fmts = self.format_bookmarks(self.parseSFL2_FavoriteVolumes(mru_file))
-
-                elif self.isMatch(f, ['*.LSSharedFileList.plist']):
-                    fmts = self.format_bookmarks(self.parseLSSharedFileListPlist(mru_file))
-
-                elif f == "com.apple.finder.plist":
-                    bookmarks, aliases = self.parseFinderPlist(mru_file)
-                    fmts = self.format_bookmarks_alias(bookmarks, aliases)
-
-                elif f == "com.apple.sidebarlists.plist":
-                    fmts = self.format_aliases(self.parseSidebarlistsPlist(mru_file))
-
-                elif f == "com.apple.recentitems.plist":
-                    bookmarks, aliases = self.parseRecentItemsPlist(mru_file)
-                    fmts = self.format_bookmarks_alias(bookmarks, aliases)
-
-                elif f.endswith(".securebookmarks.plist"):
-                    fmts = self.format_bookmarks(self.parseMSOffice2016Plist(mru_file))
-
-                elif f == "com.microsoft.office.plist":
-                    fmts = self.format_aliases(self.parseMSOffice2011Plist(mru_file))
-
-                elif f == "com.apple.spotlight.Shortcuts":
-                    fmts = self.format_dict_data(self.spotlightShortcuts(mru_file))
-
-                else:
-                    continue
-
-                if len(fmts) > 0:
-                    self.log.debug("[+] mru found : " + str(mru_file))
-                    self.write(self.build_header(mru_file))
-                    for fmt in fmts:
-                        self.write(fmt.format() + "\n")
+            if len(fmts) > 0:
+                self.log.debug("[+] now parsing " + str(target_path))
+                self.write(self.build_header(target_path))
+                for fmt in fmts:
+                    self.write(fmt.format() + "\n")
+        self.write("\n")
 
 def usage():
     print("[+] parse plists relates to mru files (most rencently used file) .")
