@@ -61,7 +61,7 @@ git clone https://github.com/stqp/test_mft.git MFT;
 
 if [ -e /Applications/MacRipper.app ]
 then 
-  rm -r /Applications/MacRipper.app
+  sudo rm -fr /Applications/MacRipper.app
 fi
 
 mv ./MFT/mac_ripper/automator/MacRipper.app /Applications/MacRipper.app;
