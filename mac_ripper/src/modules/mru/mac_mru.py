@@ -230,7 +230,7 @@ class Mru:
             for n, item in enumerate(plistfile):
                 try:
                     bookmarkdata = plistfile[item]["kBookmarkDataKey"]
-                    for attr, blob in bookmarkdata.__dict__.iteritems():
+                    for attr, blob in bookmarkdata.__dict__.items():
                         try:
                             bookmarks.append(Bookmark(data=blob).parse())
                         except:
