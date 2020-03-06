@@ -11,6 +11,10 @@ then
 fi
 
 
+## enable brew to install packages.
+sudo chown -R $(whoami) /usr/local/lib/pkgconfig
+
+
 ## install brew command
 which brew >/dev/null 2>&1;
 if [ $? -ne 0 ]
