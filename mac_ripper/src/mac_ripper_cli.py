@@ -130,7 +130,7 @@ def banner(log):
              / / / / / / /_/ / /__   / /  / / /_/ / /_/ /  __/ /    
             /_/ /_/ /_/\__,_/\___/  /_/  /_/ .___/ .___/\___/_/     
                                            /_/   /_/              
-                                                         ver. 1.0.0 """)
+                                                         ver. 0.1.0 """)
 
 
 def is_arguments_valid(log, root, output, timezone):
