@@ -23,6 +23,7 @@ fi
 
 ## install brew formula
 brew_deps=(
+git
 tcl-tk
 python3
 )
@@ -43,6 +44,7 @@ done
 
 
 pip_deps=(
+pip3
 pytz
 lz4
 inquirer
